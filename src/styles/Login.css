@@ -1,0 +1,14 @@
+button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #b91c1c;
+  background: #fff1f2;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 13px;
+}
