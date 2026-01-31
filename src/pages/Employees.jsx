@@ -41,7 +41,7 @@ const Employees = () => {
     return (
       <div className="employees-container">
         <nav className="navbar">
-          <div className="navbar-brand">Sistem Absensi</div>
+          <div className="navbar-brand">SSMAS</div>
           <div className="navbar-menu">
             <span className="user-info">{userName()}</span>
             <button onClick={logout} className="logout-btn">Logout</button>
@@ -58,7 +58,7 @@ const Employees = () => {
   return (
     <div className="employees-container">
       <nav className="navbar">
-        <div className="navbar-brand">Sistem Absensi — Admin</div>
+        <div className="navbar-brand">SSMAS | Admin</div>
         <div className="navbar-menu">
           <span className="user-info">{userName()}</span>
           <button onClick={logout} className="logout-btn">Logout</button>
@@ -82,7 +82,7 @@ const Employees = () => {
                 <th>Tanggal Lahir</th>
                 <th>Divisi</th>
                 <th>Jenis Kelamin</th>
-                <th>Status</th>
+                <th className="col-status">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -95,7 +95,7 @@ const Employees = () => {
                   <td>{k.tglLahir ? new Date(k.tglLahir).toLocaleDateString("id-ID") : "-"}</td>
                   <td>{k.divisi || "-"}</td>
                   <td>{k.jenisKel || "-"}</td>
-                  <td>{currentlyOnLeave.some((l) => l.nik === k.nik) ? "Cuti" : "Tidak Cuti"}</td>
+                  <td className="col-status">{currentlyOnLeave.some((l) => l.nik === k.nik) ? "Cuti" : "Tidak Cuti"}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,4 +1,4 @@
-# Sistem Absensi (Attendance System)
+# SSMAS (Attendance System)
 
 Full-stack attendance app aligned with the ERD: **Admin**, **Karyawan**, **Absen**, **Melakukan** (and **Leaves** for cuti).
 

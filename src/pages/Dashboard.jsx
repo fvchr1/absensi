@@ -136,7 +136,7 @@ const Dashboard = () => {
     return (
       <div className="dashboard-container">
         <nav className="navbar">
-          <div className="navbar-brand">Sistem Absensi — Admin</div>
+          <div className="navbar-brand"> SSMAS | Admin</div>
           <div className="navbar-menu">
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
@@ -228,7 +228,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <nav className="navbar">
-        <div className="navbar-brand">Sistem Absensi</div>
+        <div className="navbar-brand">SSMAS</div>
         <div className="navbar-menu">
           <span className="user-info">Hello, {userName()}</span>
           <button onClick={logout} className="logout-btn">Logout</button>

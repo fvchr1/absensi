@@ -103,6 +103,11 @@
   font-weight: 600;
 }
 
+.employees-table .col-status {
+  min-width: 100px;
+  white-space: nowrap;
+}
+
 .employees-table td {
   padding: 15px;
   border-bottom: 1px solid #eee;

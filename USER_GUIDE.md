@@ -1,4 +1,4 @@
-# 📝 Panduan Penggunaan Sistem Absensi
+# 📝 Panduan Penggunaan SSMAS
 
 ## Login
 

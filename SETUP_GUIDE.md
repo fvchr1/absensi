@@ -1,4 +1,4 @@
-# Sistem Absensi Web
+# SSMAS Web
 
 Aplikasi web untuk manajemen absensi karyawan dengan backend Spring Boot dan frontend React + Vite.
 

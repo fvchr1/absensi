@@ -135,7 +135,7 @@ const Leaves = () => {
   return (
     <div className="leaves-container">
       <nav className="navbar">
-        <div className="navbar-brand">Sistem Absensi</div>
+        <div className="navbar-brand">SSMAS</div>
         <div className="navbar-menu">
           <span className="user-info">{userName()}</span>
           <button onClick={logout} className="logout-btn">Logout</button>

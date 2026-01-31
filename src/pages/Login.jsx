@@ -28,7 +28,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1>Sistem Absensi</h1>
+        <h1>SSSMAS</h1>
         <p className="login-subtitle">Masuk dengan username dan password</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
