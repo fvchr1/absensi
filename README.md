@@ -1,3 +1,23 @@
+# Sistem Absensi (Attendance System)
+
+Full-stack attendance app aligned with the ERD: **Admin**, **Karyawan**, **Absen**, **Melakukan** (and **Leaves** for cuti).
+
+## Test accounts (login)
+
+| Role   | Username | Password    |
+|--------|----------|-------------|
+| Admin  | `1` or `admin` | `password123` |
+| User (Karyawan) | `EMP001` | `password123` |
+
+- **Admin dashboard**: manage karyawan, view all attendance, approve/reject leaves.
+- **User dashboard**: check-in/check-out, view own attendance and leave requests.
+
+## Run
+
+- **Backend**: `cd attendance-backend && mvn spring-boot:run` (port 8080)
+- **Frontend**: `npm run dev` (port 5173)
+
+---
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

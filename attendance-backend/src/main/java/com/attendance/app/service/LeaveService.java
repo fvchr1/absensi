@@ -2,13 +2,14 @@ package com.attendance.app.service;
 
 import com.attendance.app.dto.LeaveDTO;
 import com.attendance.app.model.Leave;
-import com.attendance.app.model.Employee;
+import com.attendance.app.model.Karyawan;
 import com.attendance.app.repository.LeaveRepository;
-import com.attendance.app.repository.EmployeeRepository;
+import com.attendance.app.repository.KaryawanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,13 +20,22 @@ public class LeaveService {
     private LeaveRepository leaveRepository;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private KaryawanRepository karyawanRepository;
+
+    @Autowired
+    private MelakukanService melakukanService;
 
     public LeaveDTO requestLeave(Leave leave) {
-        Employee employee = employeeRepository.findById(leave.getEmployee().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        Karyawan karyawan = karyawanRepository.findByNik(leave.getKaryawan().getNik())
+                .orElseThrow(() -> new RuntimeException("Karyawan not found"));
 
-        leave.setEmployee(employee);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Jakarta"));
+        if (melakukanService.hasAttendedOnDate(karyawan.getNik(), today)
+                && (leave.getStartDate().isBefore(today) || leave.getStartDate().equals(today))) {
+            throw new RuntimeException("Anda sudah absen hari ini. Cuti harus dimulai besok (H+1).");
+        }
+
+        leave.setKaryawan(karyawan);
         leave.setApprovalStatus(Leave.ApprovalStatus.PENDING);
 
         Leave savedLeave = leaveRepository.save(leave);
@@ -51,8 +61,8 @@ public class LeaveService {
         return convertToDTO(updated);
     }
 
-    public List<LeaveDTO> getLeaveByEmployeeId(Long employeeId) {
-        return leaveRepository.findByEmployeeId(employeeId).stream()
+    public List<LeaveDTO> getLeaveByNik(String nik) {
+        return leaveRepository.findByKaryawan_Nik(nik).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -64,8 +74,19 @@ public class LeaveService {
                 .collect(Collectors.toList());
     }
 
-    public List<LeaveDTO> getLeaveByDateRange(Long employeeId, LocalDate startDate, LocalDate endDate) {
-        return leaveRepository.findByStartDateBetweenAndEmployeeId(startDate, endDate, employeeId)
+    /** Approved leaves where today (Asia/Jakarta) is within [startDate, endDate] — status cuti = true only on these dates. */
+    public List<LeaveDTO> getCurrentlyOnLeave() {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Jakarta"));
+        return leaveRepository
+                .findByApprovalStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                        Leave.ApprovalStatus.APPROVED, today, today)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<LeaveDTO> getLeaveByDateRange(String nik, LocalDate startDate, LocalDate endDate) {
+        return leaveRepository.findByStartDateBetweenAndKaryawan_Nik(startDate, endDate, nik)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -84,8 +105,8 @@ public class LeaveService {
     private LeaveDTO convertToDTO(Leave leave) {
         return new LeaveDTO(
                 leave.getId(),
-                leave.getEmployee().getId(),
-                leave.getEmployee().getName(),
+                leave.getKaryawan().getNik(),
+                leave.getKaryawan().getNama(),
                 leave.getStartDate(),
                 leave.getEndDate(),
                 leave.getLeaveType().name(),

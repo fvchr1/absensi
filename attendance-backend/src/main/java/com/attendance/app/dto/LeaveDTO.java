@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class LeaveDTO {
     private Long id;
-    private Long employeeId;
+    private String nik;
     private String employeeName;
     private LocalDate startDate;
     private LocalDate endDate;

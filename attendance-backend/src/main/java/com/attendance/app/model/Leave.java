@@ -17,8 +17,8 @@ public class Leave {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
+    @JoinColumn(name = "nik", nullable = false)
+    private Karyawan karyawan;
 
     @Column(nullable = false)
     private LocalDate startDate;

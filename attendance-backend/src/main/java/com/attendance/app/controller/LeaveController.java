@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/leaves")
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"}, maxAge = 3600)
 public class LeaveController {
 
     @Autowired
@@ -51,9 +51,9 @@ public class LeaveController {
         }
     }
 
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<LeaveDTO>> getLeaveByEmployee(@PathVariable Long employeeId) {
-        return ResponseEntity.ok(leaveService.getLeaveByEmployeeId(employeeId));
+    @GetMapping("/employee/{nik}")
+    public ResponseEntity<List<LeaveDTO>> getLeaveByNik(@PathVariable String nik) {
+        return ResponseEntity.ok(leaveService.getLeaveByNik(nik));
     }
 
     @GetMapping("/pending")
@@ -61,12 +61,17 @@ public class LeaveController {
         return ResponseEntity.ok(leaveService.getPendingLeaves());
     }
 
-    @GetMapping("/employee/{employeeId}/range")
+    @GetMapping("/approved/currently-on-leave")
+    public ResponseEntity<List<LeaveDTO>> getCurrentlyOnLeave() {
+        return ResponseEntity.ok(leaveService.getCurrentlyOnLeave());
+    }
+
+    @GetMapping("/employee/{nik}/range")
     public ResponseEntity<List<LeaveDTO>> getLeaveByDateRange(
-            @PathVariable Long employeeId,
+            @PathVariable String nik,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return ResponseEntity.ok(leaveService.getLeaveByDateRange(employeeId, startDate, endDate));
+        return ResponseEntity.ok(leaveService.getLeaveByDateRange(nik, startDate, endDate));
     }
 
     @GetMapping("/{id}")

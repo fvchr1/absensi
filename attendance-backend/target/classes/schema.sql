@@ -1,39 +1,52 @@
--- Create Attendance Database
--- H2 does not support CREATE DATABASE, it's created automatically
+-- ERD: Admin, Karyawan, Absen, Melakukan (Detail Absen merged into Melakukan)
+-- H2: tables created automatically; this file ensures initial schema
 
--- Create employees table
-CREATE TABLE IF NOT EXISTS employees (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    nip VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+-- Admin: id_admin, nama, password
+CREATE TABLE IF NOT EXISTS admin (
+    id_admin BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nama VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Karyawan: nik, nama, alamat, no_tlp, password, tgl_lahir, divisi, jenis_kel, status
+CREATE TABLE IF NOT EXISTS karyawan (
+    nik VARCHAR(20) PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    alamat VARCHAR(255),
+    no_tlp VARCHAR(30),
     password VARCHAR(255) NOT NULL,
-    department VARCHAR(100) NOT NULL,
-    position VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(20) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'EMPLOYEE',
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    tgl_lahir DATE,
+    divisi VARCHAR(100),
+    jenis_kel VARCHAR(10),
+    status BOOLEAN DEFAULT FALSE
 );
 
--- Create attendance table
-CREATE TABLE IF NOT EXISTS attendance (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    employee_id BIGINT NOT NULL,
-    attendance_date DATE NOT NULL,
-    check_in_time TIME,
-    check_out_time TIME,
-    status VARCHAR(20) NOT NULL DEFAULT 'PRESENT',
-    notes TEXT,
+-- Absen: id_absen, tgl, id_admin (Admin Mengolah Absen)
+CREATE TABLE IF NOT EXISTS absen (
+    id_absen BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tgl DATE NOT NULL,
+    id_admin BIGINT NOT NULL,
+    FOREIGN KEY (id_admin) REFERENCES admin(id_admin) ON DELETE CASCADE
+);
+
+-- Melakukan: Karyawan-Absen link with jam_masuk, jam_keluar, datetime login
+CREATE TABLE IF NOT EXISTS melakukan (
+    id_melakukan BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id_absen BIGINT NOT NULL,
+    nik VARCHAR(20) NOT NULL,
+    jam_masuk TIME,
+    jam_keluar TIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
-    UNIQUE (employee_id, attendance_date)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_absen) REFERENCES absen(id_absen) ON DELETE CASCADE,
+    FOREIGN KEY (nik) REFERENCES karyawan(nik) ON DELETE CASCADE,
+    UNIQUE (id_absen, nik)
 );
 
--- Create leaves table
+-- Leaves (Cuti) - linked to Karyawan by nik
 CREATE TABLE IF NOT EXISTS leaves (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    employee_id BIGINT NOT NULL,
+    nik VARCHAR(20) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     leave_type VARCHAR(20) NOT NULL,
@@ -41,43 +54,11 @@ CREATE TABLE IF NOT EXISTS leaves (
     approval_status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     approver_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+    FOREIGN KEY (nik) REFERENCES karyawan(nik) ON DELETE CASCADE
 );
 
--- Create indexes for better performance
-CREATE INDEX idx_attendance_employee ON attendance(employee_id);
-CREATE INDEX idx_attendance_date ON attendance(attendance_date);
-CREATE INDEX idx_leaves_employee ON leaves(employee_id);
-CREATE INDEX idx_leaves_status ON leaves(approval_status);
-
--- Insert sample data
--- Password: password123 (encoded with BCrypt)
--- To generate: new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("password123")
-
--- Sample encoded password: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm
--- For simplicity, we'll use a simpler password hash
-
-INSERT INTO employees (nip, name, email, password, department, position, phone_number, role, active) VALUES
-('001', 'Admin User', 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm', 'IT', 'Administrator', '081234567890', 'ADMIN', TRUE),
-('002', 'Manager User', 'manager@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm', 'HR', 'HR Manager', '081234567891', 'MANAGER', TRUE),
-('003', 'Budi Santoso', 'budi@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm', 'Sales', 'Sales Staff', '081234567892', 'EMPLOYEE', TRUE),
-('004', 'Siti Nurhaliza', 'siti@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm', 'Marketing', 'Marketing Specialist', '081234567893', 'EMPLOYEE', TRUE),
-('005', 'Ahmad Wijaya', 'ahmad@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KLm', 'Finance', 'Accountant', '081234567894', 'EMPLOYEE', TRUE);
-
--- Insert sample attendance data
-INSERT INTO attendance (employee_id, attendance_date, check_in_time, check_out_time, status) VALUES
-(1, CURDATE(), '08:00:00', '17:00:00', 'PRESENT'),
-(2, CURDATE(), '08:15:00', '17:15:00', 'LATE'),
-(3, CURDATE(), '08:05:00', '17:05:00', 'PRESENT'),
-(4, CURDATE(), '08:00:00', NULL, 'PRESENT'),
-(5, CURDATE(), NULL, NULL, 'ABSENT');
-
--- Insert sample leave data
-INSERT INTO leaves (employee_id, start_date, end_date, leave_type, reason, approval_status) VALUES
-(1, DATE_ADD(CURDATE(), INTERVAL 7 DAY), DATE_ADD(CURDATE(), INTERVAL 10 DAY), 'ANNUAL', 'Liburan ke Bali', 'APPROVED'),
-(2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 2 DAY), 'SICK', 'Demam tinggi', 'PENDING'),
-(3, DATE_ADD(CURDATE(), INTERVAL 14 DAY), DATE_ADD(CURDATE(), INTERVAL 14 DAY), 'PERSONAL', 'Keperluan pribadi', 'PENDING');
-
--- Note: For actual password hashing, generate using Spring Boot:
--- System.out.println(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("password123"));
--- This will give you the proper bcrypt hash to use in the INSERT statements above
+CREATE INDEX IF NOT EXISTS idx_absen_tgl ON absen(tgl);
+CREATE INDEX IF NOT EXISTS idx_absen_admin ON absen(id_admin);
+CREATE INDEX IF NOT EXISTS idx_melakukan_absen ON melakukan(id_absen);
+CREATE INDEX IF NOT EXISTS idx_melakukan_nik ON melakukan(nik);
+CREATE INDEX IF NOT EXISTS idx_leaves_nik ON leaves(nik);

@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,10 +15,11 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login((username || "").trim(), password || "");
       window.location.href = "/dashboard";
     } catch (err) {
-      setError("Email atau password salah");
+      const msg = err.response?.data?.message || err.message || "Username atau password salah";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -28,15 +29,28 @@ const Login = () => {
     <div className="login-container">
       <div className="login-box">
         <h1>Sistem Absensi</h1>
+        <p className="login-subtitle">Masuk dengan username dan password</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           {error && <div className="error-message">{error}</div>}

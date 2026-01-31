@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class LoginResponse {
     private String token;
     private String message;
-    private EmployeeDTO employee;
+    private String role;       // "ADMIN" or "KARYAWAN"
+    private Object user;       // AdminDTO or KaryawanDTO
 }

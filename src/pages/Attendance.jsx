@@ -4,10 +4,12 @@ import { attendanceService } from "../services/api";
 import "../styles/Attendance.css";
 
 const Attendance = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isAdmin, userName, userNik } = useContext(AuthContext);
   const [attendanceList, setAttendanceList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]);
+  const [startDate, setStartDate] = useState(
+    new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]
+  );
   const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
@@ -17,8 +19,17 @@ const Attendance = () => {
   const fetchAttendance = async () => {
     setLoading(true);
     try {
-      const response = await attendanceService.getAttendanceByDateRange(user.id, startDate, endDate);
-      setAttendanceList(response.data);
+      if (isAdmin()) {
+        const response = await attendanceService.getAllByRange(startDate, endDate);
+        setAttendanceList(response.data || []);
+      } else {
+        const response = await attendanceService.getByKaryawanNikAndRange(
+          userNik(),
+          startDate,
+          endDate
+        );
+        setAttendanceList(response.data || []);
+      }
     } catch (error) {
       console.error("Error fetching attendance:", error);
     } finally {
@@ -30,38 +41,21 @@ const Attendance = () => {
     fetchAttendance();
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "PRESENT":
-        return "#4caf50";
-      case "LATE":
-        return "#ff9800";
-      case "ABSENT":
-        return "#f44336";
-      case "SICK":
-        return "#2196f3";
-      case "LEAVE":
-        return "#9c27b0";
-      default:
-        return "#666";
-    }
-  };
+  const formatTime = (t) => (t ? String(t).substring(0, 5) : "-");
 
   return (
     <div className="attendance-container">
       <nav className="navbar">
         <div className="navbar-brand">Sistem Absensi</div>
         <div className="navbar-menu">
-          <a href="/dashboard">Dashboard</a>
-          <span className="user-info">{user?.name}</span>
-          <button onClick={logout} className="logout-btn">
-            Logout
-          </button>
+          <span className="user-info">{userName()}</span>
+          <button onClick={logout} className="logout-btn">Logout</button>
         </div>
       </nav>
 
       <div className="attendance-content">
-        <h1>Riwayat Absensi</h1>
+        <a href="/dashboard" className="btn-back">← Kembali ke Dashboard</a>
+        <h1>{isAdmin() ? "Semua Riwayat Absen" : "Riwayat Absensi"}</h1>
 
         <div className="filter-section">
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -76,25 +70,25 @@ const Attendance = () => {
           <table className="attendance-table">
             <thead>
               <tr>
+                {isAdmin() && <th>Kode Pegawai</th>}
+                {isAdmin() && <th>Nama</th>}
+                {isAdmin() && <th>Divisi</th>}
                 <th>Tanggal</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Status</th>
-                <th>Keterangan</th>
+                <th>Jam Masuk</th>
+                <th>Jam Keluar</th>
+                {isAdmin() && <th>Waktu Login</th>}
               </tr>
             </thead>
             <tbody>
               {attendanceList.map((record) => (
-                <tr key={record.id}>
-                  <td>{new Date(record.attendanceDate).toLocaleDateString("id-ID")}</td>
-                  <td>{record.checkInTime}</td>
-                  <td>{record.checkOutTime || "-"}</td>
-                  <td>
-                    <span className="status-badge" style={{ backgroundColor: getStatusColor(record.status) }}>
-                      {record.status}
-                    </span>
-                  </td>
-                  <td>{record.notes || "-"}</td>
+                <tr key={record.idMelakukan || record.tgl + record.nik}>
+                  {isAdmin() && <td>{record.nik}</td>}
+                  {isAdmin() && <td>{record.namaKaryawan}</td>}
+                  {isAdmin() && <td>{record.divisiKaryawan || "-"}</td>}
+                  <td>{record.tgl ? new Date(record.tgl).toLocaleDateString("id-ID") : "-"}</td>
+                  <td>{formatTime(record.jamMasuk)}</td>
+                  <td>{formatTime(record.jamKeluar)}</td>
+                  {isAdmin() && <td>{record.createdAt ? new Date(record.createdAt).toLocaleString("id-ID") : "-"}</td>}
                 </tr>
               ))}
             </tbody>

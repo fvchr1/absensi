@@ -1,96 +1,81 @@
 package com.attendance.app.controller;
 
-import com.attendance.app.dto.AttendanceDTO;
-import com.attendance.app.model.Attendance;
-import com.attendance.app.service.AttendanceService;
+import com.attendance.app.dto.KaryawanAbsenTodayDTO;
+import com.attendance.app.dto.MelakukanDTO;
+import com.attendance.app.service.MelakukanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/attendance")
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"}, maxAge = 3600)
 public class AttendanceController {
 
     @Autowired
-    private AttendanceService attendanceService;
+    private MelakukanService melakukanService;
 
-    @PostMapping("/check-in/{employeeId}")
-    public ResponseEntity<?> checkIn(@PathVariable Long employeeId) {
+    @PostMapping("/check-in/{nik}")
+    public ResponseEntity<?> checkIn(@PathVariable String nik) {
         try {
-            Attendance attendance = attendanceService.checkIn(employeeId);
-            return ResponseEntity.ok(attendance);
+            MelakukanDTO dto = melakukanService.checkIn(nik);
+            return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/check-out/{employeeId}")
-    public ResponseEntity<?> checkOut(@PathVariable Long employeeId) {
+    @PostMapping("/check-out/{nik}")
+    public ResponseEntity<?> checkOut(@PathVariable String nik) {
         try {
-            Attendance attendance = attendanceService.checkOut(employeeId);
-            return ResponseEntity.ok(attendance);
+            MelakukanDTO dto = melakukanService.checkOut(nik);
+            return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<AttendanceDTO>> getAttendanceByEmployee(@PathVariable Long employeeId) {
-        return ResponseEntity.ok(attendanceService.getAttendanceByEmployeeId(employeeId));
+    @GetMapping("/employee/{nik}")
+    public ResponseEntity<List<MelakukanDTO>> getByKaryawanNik(@PathVariable String nik) {
+        return ResponseEntity.ok(melakukanService.getByKaryawanNik(nik));
     }
 
-    @GetMapping("/employee/{employeeId}/range")
-    public ResponseEntity<List<AttendanceDTO>> getAttendanceByDateRange(
-            @PathVariable Long employeeId,
+    @GetMapping("/employee/{nik}/today")
+    public ResponseEntity<?> getTodayByNik(@PathVariable String nik) {
+        return melakukanService.getTodayByNik(nik)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/employee/{nik}/range")
+    public ResponseEntity<List<MelakukanDTO>> getByKaryawanNikAndRange(
+            @PathVariable String nik,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return ResponseEntity.ok(attendanceService.getAttendanceByDateRange(employeeId, startDate, endDate));
+        return ResponseEntity.ok(melakukanService.getByKaryawanNikAndDateRange(nik, startDate, endDate));
     }
 
     @GetMapping("/all-range")
-    public ResponseEntity<List<AttendanceDTO>> getAllAttendanceByRange(
+    public ResponseEntity<List<MelakukanDTO>> getAllByRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return ResponseEntity.ok(attendanceService.getAllAttendanceByDateRange(startDate, endDate));
+        return ResponseEntity.ok(melakukanService.getAllByDateRange(startDate, endDate));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AttendanceDTO> getAttendanceById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(attendanceService.getAttendanceById(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/today")
+    public ResponseEntity<List<MelakukanDTO>> getTodayAttendance() {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Jakarta"));
+        return ResponseEntity.ok(melakukanService.getAllByDateRange(today, today));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateAttendance(@PathVariable Long id, @RequestBody Attendance attendanceDetails) {
-        try {
-            AttendanceDTO updatedAttendance = attendanceService.updateAttendance(id, attendanceDetails);
-            return ResponseEntity.ok(updatedAttendance);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity<?> markAttendance(@RequestBody Attendance attendance) {
-        try {
-            Attendance saved = attendanceService.markAttendance(attendance);
-            return ResponseEntity.ok(saved);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAttendance(@PathVariable Long id) {
-        attendanceService.deleteAttendance(id);
-        return ResponseEntity.ok("Attendance record deleted successfully");
+    /** Daftar semua karyawan dengan status absen hari ini (sudah/belum check-in). */
+    @GetMapping("/today-with-karyawan")
+    public ResponseEntity<List<KaryawanAbsenTodayDTO>> getTodayWithAllKaryawan() {
+        return ResponseEntity.ok(melakukanService.getTodayWithAllKaryawan());
     }
 }

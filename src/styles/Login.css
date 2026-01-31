@@ -1,14 +1,138 @@
-button[type="submit"]:disabled {
+/* Login page - full layout and form */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.login-box h1 {
+  color: #333;
+  font-size: 26px;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.login-subtitle {
+  color: #666;
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-box .form-group {
+  margin-bottom: 16px;
+}
+
+.login-box .form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.login-box .form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.login-box .form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.login-box .form-group input::placeholder {
+  color: #999;
+}
+
+.login-box button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.login-box button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.login-box button[type="submit"]:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
 .error-message {
   color: #b91c1c;
-  background: #fff1f2;
+  background: #fef2f2;
   padding: 10px 12px;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   text-align: center;
   font-size: 13px;
+  border: 1px solid #fecaca;
+}
+
+.test-accounts {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #333;
+  border: 1px solid #bae6fd;
+}
+
+.test-accounts-title {
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #0c4a6e;
+}
+
+.test-accounts ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.test-accounts li {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.test-accounts code {
+  background: #e0f2fe;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
 }

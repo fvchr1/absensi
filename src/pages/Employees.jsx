@@ -1,70 +1,101 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { employeeService } from "../services/api";
+import { karyawanService, leaveService } from "../services/api";
 import "../styles/Employees.css";
 
 const Employees = () => {
-  const { user, logout } = useContext(AuthContext);
-  const [employees, setEmployees] = useState([]);
+  const { user, logout, isAdmin, userName } = useContext(AuthContext);
+  const [karyawan, setKaryawan] = useState([]);
+  const [currentlyOnLeave, setCurrentlyOnLeave] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchEmployees();
+    if (isAdmin()) {
+      fetchKaryawan();
+      fetchCurrentlyOnLeave();
+    }
   }, []);
 
-  const fetchEmployees = async () => {
+  const fetchKaryawan = async () => {
     setLoading(true);
     try {
-      const response = await employeeService.getAllEmployees();
-      setEmployees(response.data);
+      const response = await karyawanService.getAll();
+      setKaryawan(response.data || []);
     } catch (error) {
-      console.error("Error fetching employees:", error);
+      console.error("Error fetching karyawan:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchCurrentlyOnLeave = async () => {
+    try {
+      const res = await leaveService.getCurrentlyOnLeave();
+      setCurrentlyOnLeave(res.data ?? []);
+    } catch (e) {
+      console.error("Error fetching currently on leave:", e);
+    }
+  };
+
+  if (!isAdmin()) {
+    return (
+      <div className="employees-container">
+        <nav className="navbar">
+          <div className="navbar-brand">Sistem Absensi</div>
+          <div className="navbar-menu">
+            <span className="user-info">{userName()}</span>
+            <button onClick={logout} className="logout-btn">Logout</button>
+          </div>
+        </nav>
+        <div className="employees-content">
+          <p className="no-data">Akses hanya untuk Admin.</p>
+          <a href="/dashboard">Kembali ke Dashboard</a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="employees-container">
       <nav className="navbar">
-        <div className="navbar-brand">Sistem Absensi</div>
+        <div className="navbar-brand">Sistem Absensi — Admin</div>
         <div className="navbar-menu">
-          <a href="/dashboard">Dashboard</a>
-          <span className="user-info">{user?.name}</span>
-          <button onClick={logout} className="logout-btn">
-            Logout
-          </button>
+          <span className="user-info">{userName()}</span>
+          <button onClick={logout} className="logout-btn">Logout</button>
         </div>
       </nav>
 
       <div className="employees-content">
+        <a href="/dashboard" className="btn-back">← Kembali ke Dashboard</a>
         <h1>Daftar Karyawan</h1>
 
         {loading ? (
           <p>Loading...</p>
-        ) : employees.length > 0 ? (
+        ) : karyawan.length > 0 ? (
           <table className="employees-table">
             <thead>
               <tr>
-                <th>NIP</th>
+                <th>Kode Pegawai</th>
                 <th>Nama</th>
-                <th>Email</th>
-                <th>Departemen</th>
-                <th>Posisi</th>
-                <th>Telepon</th>
-                <th>Role</th>
+                <th>Alamat</th>
+                <th>No. Telepon</th>
+                <th>Tanggal Lahir</th>
+                <th>Divisi</th>
+                <th>Jenis Kelamin</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {employees.map((employee) => (
-                <tr key={employee.id}>
-                  <td>{employee.nip}</td>
-                  <td>{employee.name}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.department}</td>
-                  <td>{employee.position}</td>
-                  <td>{employee.phoneNumber}</td>
-                  <td>{employee.role}</td>
+              {karyawan.map((k) => (
+                <tr key={k.nik}>
+                  <td>{k.nik}</td>
+                  <td>{k.nama}</td>
+                  <td>{k.alamat || "-"}</td>
+                  <td>{k.noTlp || "-"}</td>
+                  <td>{k.tglLahir ? new Date(k.tglLahir).toLocaleDateString("id-ID") : "-"}</td>
+                  <td>{k.divisi || "-"}</td>
+                  <td>{k.jenisKel || "-"}</td>
+                  <td>{currentlyOnLeave.some((l) => l.nik === k.nik) ? "Cuti" : "Tidak Cuti"}</td>
                 </tr>
               ))}
             </tbody>
