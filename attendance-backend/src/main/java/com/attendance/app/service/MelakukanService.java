@@ -2,6 +2,8 @@ package com.attendance.app.service;
 
 import com.attendance.app.dto.KaryawanAbsenTodayDTO;
 import com.attendance.app.dto.MelakukanDTO;
+import com.attendance.app.dto.RekapAbsenDTO;
+import com.attendance.app.dto.RekapAbsenKaryawanDTO;
 import com.attendance.app.model.Absen;
 import com.attendance.app.model.Karyawan;
 import com.attendance.app.model.Melakukan;
@@ -9,13 +11,16 @@ import com.attendance.app.repository.KaryawanRepository;
 import com.attendance.app.repository.MelakukanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +37,7 @@ public class MelakukanService {
 
     private static final ZoneId ZONE_JAKARTA = ZoneId.of("Asia/Jakarta");
 
+    @Transactional
     public MelakukanDTO checkIn(String nik) {
         Karyawan karyawan = karyawanRepository.findByNik(nik)
                 .orElseThrow(() -> new RuntimeException("Karyawan not found"));
@@ -53,6 +59,7 @@ public class MelakukanService {
         return toDTO(saved);
     }
 
+    @Transactional
     public MelakukanDTO checkOut(String nik) {
         LocalDate today = LocalDate.now(ZONE_JAKARTA);
         Absen absen = absenService.findByTgl(today)
@@ -134,6 +141,142 @@ public class MelakukanService {
                             null,
                             null,
                             false);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Rekap absensi bulanan: menghitung total gaji berdasarkan absensi semua karyawan dalam bulan ini.
+     * Gaji pokok: 4jt, Gaji absensi full: 1jt (dibagi per hari kerja), Lembur: 100rb/hari.
+     */
+    public RekapAbsenDTO getMonthlyRecap() {
+        LocalDate now = LocalDate.now(ZONE_JAKARTA);
+        LocalDate startOfMonth = now.withDayOfMonth(1);
+        LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
+
+        // Hitung hari kerja (Senin-Jumat) dalam bulan ini
+        int totalHariKerja = 0;
+        LocalDate date = startOfMonth;
+        while (!date.isAfter(endOfMonth)) {
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+                totalHariKerja++;
+            }
+            date = date.plusDays(1);
+        }
+
+        // Hitung total hari absen semua karyawan dalam bulan ini (distinct dates)
+        List<Melakukan> bulanIni = melakukanRepository.findByAbsen_TglBetween(startOfMonth, endOfMonth);
+        Set<LocalDate> distinctDates = bulanIni.stream()
+                .map(m -> m.getAbsen().getTgl())
+                .collect(Collectors.toSet());
+        
+        // Pisahkan weekday vs weekend
+        long totalHariAbsen = distinctDates.stream()
+                .filter(d -> {
+                    DayOfWeek dayOfWeek = d.getDayOfWeek();
+                    return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+                })
+                .count();
+        
+        long hariLembur = distinctDates.stream()
+                .filter(d -> {
+                    DayOfWeek dayOfWeek = d.getDayOfWeek();
+                    return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+                })
+                .count();
+
+        // Perhitungan gaji
+        double gajiPokok = 4_500_000.0;
+        double gajiAbsensiFull = 1_000_000.0;
+        double gajiPerHari = totalHariKerja > 0 ? gajiAbsensiFull / totalHariKerja : 0;
+        double gajiAbsensi = totalHariAbsen * gajiPerHari;
+        double gajiLemburPerHari = 100_000.0;
+        double gajiLembur = hariLembur * gajiLemburPerHari;
+        double totalGaji = gajiPokok + gajiAbsensi + gajiLembur;
+
+        return new RekapAbsenDTO(
+                totalHariKerja,
+                (int) totalHariAbsen,
+                gajiPokok,
+                gajiPerHari,
+                gajiAbsensi,
+                (int) hariLembur,
+                gajiLembur,
+                totalGaji
+        );
+    }
+
+    /**
+     * Rekap absensi bulanan per karyawan: menghitung gaji setiap karyawan berdasarkan absensi bulan ini.
+     */
+    public List<RekapAbsenKaryawanDTO> getMonthlyRecapPerKaryawan() {
+        LocalDate now = LocalDate.now(ZONE_JAKARTA);
+        LocalDate startOfMonth = now.withDayOfMonth(1);
+        LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
+
+        // Hitung hari kerja (Senin-Jumat) dalam bulan ini
+        int totalHariKerja = 0;
+        LocalDate date = startOfMonth;
+        while (!date.isAfter(endOfMonth)) {
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+                totalHariKerja++;
+            }
+            date = date.plusDays(1);
+        }
+
+        // Ambil semua karyawan
+        List<Karyawan> allKaryawan = karyawanRepository.findAll();
+
+        // Ambil semua absen bulan ini dan group by nik, hitung distinct dates per karyawan
+        List<Melakukan> bulanIni = melakukanRepository.findByAbsen_TglBetween(startOfMonth, endOfMonth);
+        java.util.Map<String, Set<LocalDate>> absenDatesByNik = bulanIni.stream()
+                .collect(Collectors.groupingBy(
+                        m -> m.getKaryawan().getNik(),
+                        Collectors.mapping(m -> m.getAbsen().getTgl(), Collectors.toSet())
+                ));
+
+        // Perhitungan gaji
+        double gajiPokok = 4_500_000.0;
+        double gajiAbsensiFull = 1_000_000.0;
+        double gajiPerHari = totalHariKerja > 0 ? gajiAbsensiFull / totalHariKerja : 0;
+        double gajiLemburPerHari = 100_000.0;
+
+        return allKaryawan.stream()
+                .map(k -> {
+                    Set<LocalDate> dates = absenDatesByNik.getOrDefault(k.getNik(), Set.of());
+                    
+                    // Pisahkan hari absen: weekday (Senin-Jumat) vs weekend/holiday (Sabtu, Minggu)
+                    long hariAbsen = dates.stream()
+                            .filter(d -> {
+                                DayOfWeek dayOfWeek = d.getDayOfWeek();
+                                return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+                            })
+                            .count();
+                    
+                    long hariLembur = dates.stream()
+                            .filter(d -> {
+                                DayOfWeek dayOfWeek = d.getDayOfWeek();
+                                return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+                            })
+                            .count();
+                    
+                    double gajiAbsensi = hariAbsen * gajiPerHari;
+                    double gajiLembur = hariLembur * gajiLemburPerHari;
+                    double totalGaji = gajiPokok + gajiAbsensi + gajiLembur;
+
+                    return new RekapAbsenKaryawanDTO(
+                            k.getNik(),
+                            k.getNama(),
+                            k.getDivisi() != null ? k.getDivisi() : "",
+                            (int) hariAbsen,
+                            gajiPokok,
+                            gajiAbsensi,
+                            (int) hariLembur,
+                            gajiLembur,
+                            totalGaji
+                    );
                 })
                 .collect(Collectors.toList());
     }

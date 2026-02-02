@@ -7,6 +7,7 @@ import com.attendance.app.repository.LeaveRepository;
 import com.attendance.app.repository.KaryawanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -42,6 +43,7 @@ public class LeaveService {
         return convertToDTO(savedLeave);
     }
 
+    @Transactional
     public LeaveDTO approveLeave(Long leaveId) {
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
@@ -51,6 +53,7 @@ public class LeaveService {
         return convertToDTO(updated);
     }
 
+    @Transactional
     public LeaveDTO rejectLeave(Long leaveId, String reason) {
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
@@ -98,6 +101,7 @@ public class LeaveService {
         return convertToDTO(leave);
     }
 
+    @Transactional
     public void deleteLeave(Long id) {
         leaveRepository.deleteById(id);
     }

@@ -10,9 +10,11 @@
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/service/KaryawanService.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/security/JwtTokenProvider.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/controller/AuthController.java
+/Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/dto/RekapAbsenDTO.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/dto/LoginRequest.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/repository/KaryawanRepository.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/service/AuthService.java
+/Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/dto/RekapAbsenKaryawanDTO.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/controller/AttendanceController.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/controller/KaryawanController.java
 /Users/macbook-proxulu/absensi/attendance-backend/src/main/java/com/attendance/app/service/MelakukanService.java

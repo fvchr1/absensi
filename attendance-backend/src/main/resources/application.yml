@@ -1,11 +1,12 @@
 spring:
   application:
     name: attendance-system
-  # Default to H2 in-memory database to avoid requiring MySQL on the local machine.
-  # To use MySQL again, replace these values with your MySQL URL/credentials or create
+  # H2 file-based database - data tersimpan permanen di file ./data/attendance_db.mv.db
+  # Data tidak akan hilang saat aplikasi di-restart.
+  # To use MySQL instead, replace these values with your MySQL URL/credentials or create
   # an `application-mysql.yml` and activate the profile.
   datasource:
-    url: jdbc:h2:mem:attendance_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./data/attendance_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
     username: sa
     password:
     driver-class-name: org.h2.Driver

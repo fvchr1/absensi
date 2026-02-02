@@ -44,6 +44,8 @@ export const attendanceService = {
     api.get("/attendance/all-range", { params: { startDate, endDate } }),
   getToday: () => api.get("/attendance/today"),
   getTodayWithKaryawan: () => api.get("/attendance/today-with-karyawan"),
+  getMonthlyRecap: () => api.get("/attendance/monthly-recap"),
+  getMonthlyRecapPerKaryawan: () => api.get("/attendance/monthly-recap-per-karyawan"),
 };
 
 // Leaves (Cuti) - by nik

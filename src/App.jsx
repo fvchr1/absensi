@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Employees from "./pages/Employees";
+import RekapAbsen from "./pages/RekapAbsen";
 import "./App.css";
 
 function ProtectedRoute({ children }) {
@@ -56,6 +57,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Employees />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rekap-absen"
+          element={
+            <ProtectedRoute>
+              <RekapAbsen />
             </ProtectedRoute>
           }
         />

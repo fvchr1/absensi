@@ -160,6 +160,11 @@ const Dashboard = () => {
               <p className="stat-value">{pendingLeaves}</p>
               <a href="/leaves">Kelola Cuti</a>
             </div>
+            <div className="stat-card recap-card">
+              <h3>Rekap Absen</h3>
+              <p className="recap-month">{new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}</p>
+              <a href="/rekap-absen" className="recap-link-btn">Lihat Rekap</a>
+            </div>
           </div>
 
           <div className="admin-today-attendance">

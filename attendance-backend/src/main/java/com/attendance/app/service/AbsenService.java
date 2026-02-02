@@ -6,6 +6,7 @@ import com.attendance.app.repository.AbsenRepository;
 import com.attendance.app.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class AbsenService {
     private AdminRepository adminRepository;
 
     /** Get or create Absen for today. Uses first admin as default. */
+    @Transactional
     public Absen getOrCreateAbsenForDate(LocalDate date) {
         Optional<Absen> existing = absenRepository.findByTgl(date);
         if (existing.isPresent()) {

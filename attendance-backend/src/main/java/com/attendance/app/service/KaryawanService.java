@@ -6,6 +6,7 @@ import com.attendance.app.repository.KaryawanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class KaryawanService {
         return toDTO(k);
     }
 
+    @Transactional
     public Karyawan createKaryawan(Karyawan karyawan) {
         if (karyawanRepository.existsByNik(karyawan.getNik())) {
             throw new RuntimeException("NIK already exists");
@@ -39,6 +41,7 @@ public class KaryawanService {
         return karyawanRepository.save(karyawan);
     }
 
+    @Transactional
     public Karyawan updateKaryawan(String nik, Karyawan details) {
         Karyawan k = karyawanRepository.findByNik(nik)
                 .orElseThrow(() -> new RuntimeException("Karyawan not found"));
@@ -54,6 +57,7 @@ public class KaryawanService {
         return karyawanRepository.save(k);
     }
 
+    @Transactional
     public void deleteKaryawan(String nik) {
         karyawanRepository.deleteById(nik);
     }

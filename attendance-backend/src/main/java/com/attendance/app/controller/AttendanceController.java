@@ -2,6 +2,8 @@ package com.attendance.app.controller;
 
 import com.attendance.app.dto.KaryawanAbsenTodayDTO;
 import com.attendance.app.dto.MelakukanDTO;
+import com.attendance.app.dto.RekapAbsenDTO;
+import com.attendance.app.dto.RekapAbsenKaryawanDTO;
 import com.attendance.app.service.MelakukanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -77,5 +79,17 @@ public class AttendanceController {
     @GetMapping("/today-with-karyawan")
     public ResponseEntity<List<KaryawanAbsenTodayDTO>> getTodayWithAllKaryawan() {
         return ResponseEntity.ok(melakukanService.getTodayWithAllKaryawan());
+    }
+
+    /** Rekap absensi bulanan dengan perhitungan gaji. */
+    @GetMapping("/monthly-recap")
+    public ResponseEntity<RekapAbsenDTO> getMonthlyRecap() {
+        return ResponseEntity.ok(melakukanService.getMonthlyRecap());
+    }
+
+    /** Rekap absensi bulanan per karyawan dengan detail gaji. */
+    @GetMapping("/monthly-recap-per-karyawan")
+    public ResponseEntity<List<RekapAbsenKaryawanDTO>> getMonthlyRecapPerKaryawan() {
+        return ResponseEntity.ok(melakukanService.getMonthlyRecapPerKaryawan());
     }
 }
