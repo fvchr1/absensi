@@ -51,7 +51,7 @@ USE attendance_db;
 
 ### 2. Konfigurasi Database
 
-Edit file `attendance-backend/src/main/resources/application.yml`:
+Edit file `absensi_karyawan/src/main/resources/application.yml`:
 
 ```yaml
 spring:
@@ -64,7 +64,7 @@ spring:
 ### 3. Build dan Jalankan Backend
 
 ```bash
-cd attendance-backend
+cd absensi_karyawan
 
 # Build dengan Maven
 mvn clean install
@@ -113,7 +113,7 @@ Setelah membuat database, Anda perlu insert data karyawan untuk testing.
 
 ```sql
 -- Di MySQL terminal/GUI
-source attendance-backend/src/main/resources/insert-test-data.sql;
+source absensi_karyawan/src/main/resources/insert-test-data.sql;
 ```
 
 #### Cara 2: Manual Insert
@@ -186,7 +186,7 @@ Setelah insert data, Anda bisa login dengan:
 
 ```
 vite-project/
-├── attendance-backend/          # Backend Spring Boot
+├── absensi_karyawan/          # Backend Spring Boot
 │   ├── src/main/
 │   │   ├── java/com/attendance/app/
 │   │   │   ├── controller/       # REST Controllers

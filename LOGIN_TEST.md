@@ -23,7 +23,7 @@
 ### 1. Jalankan backend
 
 ```bash
-cd attendance-backend
+cd absensi_karyawan
 mvn spring-boot:run
 ```
 

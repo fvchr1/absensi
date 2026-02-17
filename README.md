@@ -14,7 +14,7 @@ Full-stack attendance app aligned with the ERD: **Admin**, **Karyawan**, **Absen
 
 ## Run
 
-- **Backend**: `cd attendance-backend && mvn spring-boot:run` (port 8080)
+- **Backend**: `cd absensi_karyawan && mvn spring-boot:run` (port 8080)
 - **Frontend**: `npm run dev` (port 5173)
 
 ---
